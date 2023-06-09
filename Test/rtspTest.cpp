@@ -10,7 +10,7 @@ using namespace VideoStreams::rtsp;
 int main(int argc, char* argv[])
 {
     std::cout<<"stage0"<<endl;
-    memset(BUFFER,-1,bufsiz);
+    memset(BUFFER,0,bufsiz);
     std::cout<<"stage1"<<endl;
     rtsp_req<MemaryBlock> rtspreq;
     rtspreq.InitHead("%s rtsp://211.94.164.227/3.3gp RTSP/1.0 \r\n",RTSP_Method::Describe.c_str());

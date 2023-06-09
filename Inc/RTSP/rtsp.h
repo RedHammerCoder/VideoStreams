@@ -9,13 +9,16 @@
 #include <string.h>
 #include <unordered_map>
 #include <math.h>
-
 #include "../Utilly.h"
 using namespace std;
 
 
 namespace VideoStreams::rtsp
 {
+    // void MemCover(char** Dest , char *src, int src_len ,siz)
+    #define CRLF        *(BUFF++)='\r';*(BUFF++)='\n';
+
+
     const int Buffsize=256;
     struct MemaryBlock :public BinaryBlock {
         void* begin;
@@ -28,7 +31,7 @@ namespace VideoStreams::rtsp
         }
         ~MemaryBlock(){}
     };
-    array<char,2> CRLF{'\r','\n'}; 
+    // array<char,2> CRLF{'\r','\n'}; 
     size_t Port = 554 ;
     struct RTSP_VERSION{
         string V1 = "RTSP/1.0";
@@ -59,7 +62,7 @@ namespace VideoStreams::rtsp
     
     struct ReqHeaderFields {
         using  RequestHeaderFieldsMap =unordered_map<string,string>;
-        int en_serial(RequestHeaderFieldsMap,char* buff ,size_t buf_sz);
+        // int en_serial(RequestHeaderFieldsMap,char* buff ,size_t buf_sz);
     };
 
 //template T is used for
@@ -90,16 +93,17 @@ template<typename T>
             else{
                 
                 //Done: 检查空间或者建立空间
-                if(nullptr==Buff && Buffsiz==0)
-                {
-                    Buff=(char*)malloc(MaxSiz);//单位是字节
-                    Buffsiz=MaxSiz;
-                    memset(Buff,-1,Buffsiz);//全部初始化为-1 方便后续检验错误
-                }
+                // if(nullptr==Buff && Buffsiz==0)
+                // {
+                //     Buff=(char*)malloc(MaxSiz);//单位是字节
+                //     Buffsiz=MaxSiz;
+                //     memset(Buff,-1,Buffsiz);//全部初始化为-1 方便后续检验错误
+                // }
                 char* BUFF=Buff;//避免修改Buff
 
                 memcpy((void*)BUFF,(const void*)this->ReqHeader.get()->c_str(),ReqHeader.get()->length());
                 BUFF+=ReqHeader.get()->length();
+                CRLF;
                 for(auto &[ key , tail ]: this->RHMap)
                 {
                     memcpy(BUFF,key.c_str(),key.length() );
@@ -107,12 +111,10 @@ template<typename T>
                     *(BUFF++)=':';
                     memcpy(BUFF,tail.c_str(),tail.length() );
                     BUFF+=tail.length();
-                    *(BUFF++)='\r';
-                    *(BUFF++)='\n';
+                    CRLF
 
                 }
-                *(BUFF++)='\r';
-                *(BUFF++)='\n';
+                CRLF
 
                 //TODO:将序列化的数据memcpy到空间中
                 if(Content.expired()==false){
@@ -122,13 +124,29 @@ template<typename T>
                 }
                 // return make_unique<MemaryBlock>((void*)Buff,(int)(BUFF-Buff));
                 return (int)(BUFF-Buff);
-                
-
-
             }
         }
         rtsp_req& Parser(char* Buffbase , int size_t)
         {//TODO: 将Parser转变成可查询
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             return *this;
         }
         void setsiz(int siz=1480){MaxSiz=siz;}
@@ -163,7 +181,9 @@ template<typename T>
             string strl(buf,Length);
             ReqHeader=make_unique<string>(strl);
         }
-        
+        // rtsp_req& operator<<(pair<string,string){
+        //     addReqHeaderFields(std::forword<string>,)
+        // }
         //将负载装入当前东西中
         void LoadContent(weak_ptr<T> Load){
             Content=Load;//多个实体共享文件共享
