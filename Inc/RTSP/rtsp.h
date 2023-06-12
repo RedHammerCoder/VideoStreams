@@ -10,11 +10,14 @@
 #include <unordered_map>
 #include <math.h>
 #include "../Utilly.h"
+#include "../StrBindtoStru.h"
 using namespace std;
 
 
 namespace VideoStreams::rtsp
 {
+
+
     // void MemCover(char** Dest , char *src, int src_len ,siz)
     #define CRLF        *(BUFF++)='\r';*(BUFF++)='\n';
 
