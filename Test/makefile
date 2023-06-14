@@ -8,3 +8,8 @@ StrStructTest: StrStructTest.cpp
 
 ParserTest : ParserTest.cpp
 	g++ -g -std=c++2a $@.cpp -o $@.out
+
+.PHONY: clean
+
+clean :
+	rm ./*.o ./*.out

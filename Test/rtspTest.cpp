@@ -19,16 +19,12 @@ int main(int argc, char* argv[])
     std::cout<<"stageX2"<<endl;
     rtspreq.addReqHeaderFields("From","zhejiangquzhou");
     rtspreq.addReqHeaderFields("User-Agent","WebRTC");
-    rtspreq.addReqHeaderFields("Auth","%s  is  %d","helloword",24);
+    rtspreq<< make_pair<string,string>("Accept-Encoding","UTF-8");
+    rtspreq.addReqHeaderFields("Authorization","%s  is  %d","helloword",24);
     std::cout<<"stage"<<endl;
     int lens= rtspreq.serialize(BUFFER,bufsiz);
     std::cout<<string(BUFFER,lens)<<endl;
     rtsp_req<MemaryBlock> temp(BUFFER,lens);
     
-
-
-    
-    
-
     return 0;
 }

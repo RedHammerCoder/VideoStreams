@@ -41,6 +41,7 @@ using namespace std;
             return ret;                                                                  \
         }                                                                                \
         static auto GetByStr(const char *chrs)->decltype(KV.find("empty")) { return KV.find(chrs); } \
+        static auto GetByStr(string str_v)->decltype(KV.find("empty")) { return KV.find(str_v); } \
                                                                                          \
     private:                                                                             \
         Register_##str##_t() {}                                                          \
