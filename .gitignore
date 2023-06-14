@@ -1,2 +1,2 @@
-/Test/**.o
-/Test/**.out
+./Test/*.o
+./Test/*.out
