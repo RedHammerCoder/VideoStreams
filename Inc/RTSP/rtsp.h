@@ -9,18 +9,18 @@
 #include <string.h>
 #include <unordered_map>
 #include <math.h>
+#include <string_view>
 #include "../Utilly.h"
 #include "../StrBindtoStru.h"
+#include "./Method.h"
 using namespace std;
-
+using namespace VideoStreams::rtsp::method;
+using namespace BinaryOps;
 
 namespace VideoStreams::rtsp
 {
-
-
     // void MemCover(char** Dest , char *src, int src_len ,siz)
     #define CRLF        *(BUFF++)='\r';*(BUFF++)='\n';
-
 
     const int Buffsize=256;
     struct MemaryBlock :public BinaryBlock {
@@ -39,23 +39,7 @@ namespace VideoStreams::rtsp
     struct RTSP_VERSION{
         string V1 = "RTSP/1.0";
     };
-    namespace RTSP_Method {
-        const static string Option ="OPTIONS";
-        static string Describe="Describe";
-        static string Setup="Setup";
-        static string Teardown="Teardown";
-        static string Play= "Play";
-
-    }
-
-    // struct RtspMethod {
-    //     const static string Option ="OPTIONS";
-    //     static string Describe="Describe";
-    //     static string Setup="Setup";
-    //     static string Teardown="Teardown";
-    //     static string Play= "Play";
-    // };
-
+  
     // Checker is used to check the element of req or resp;
     class Checker{
         public:
@@ -76,18 +60,38 @@ namespace VideoStreams::rtsp
 template<typename T>
     class rtsp_req: private Checker {
         private:
+        Base_Method_t* MethodOfRequest;
         int MaxSiz;//序列化时最大空间
+        weak_ptr<T> Content;//需要直接拷贝到目标内存
+ReqHeaderFields::RequestHeaderFieldsMap RHMap;
+        unique_ptr<string> ReqHeader;
+        //用于保存head除了方法意外的字符串
+        unique_ptr<string> ReqHeaderBody;
+
+
+
+//------Method
         bool Check()override{
             return true;
         }
-        weak_ptr<T> Content;//需要直接拷贝到目标内存
-        ReqHeaderFields::RequestHeaderFieldsMap RHMap;
+        
+        
         public:
-        unique_ptr<string> ReqHeader;
-        ~rtsp_req()
+        void HDParser(string_view str_v )
         {
+            size_t pos=str_v.find(' ',0);
+            MethodOfRequest =(method::Base_Method_t*)(*Register_Method_t::GetByStr(str_v.substr(0,pos).data())).second ;
+    
+        }
+        void HDParser()
+        {
+            auto & Uptr = this->ReqHeader;
+            size_t siz=(Uptr.get())->find('\r\n',0);
+            MethodOfRequest =(method::Base_Method_t*)(*Register_Method_t::GetByStr(Uptr.substr(0,pos).data())).second ;
 
         }
+
+        ~rtsp_req(){}
 
         //将所有数据转变成MemBlock
         //返回值指定写入长度
@@ -129,29 +133,18 @@ template<typename T>
                 return (int)(BUFF-Buff);
             }
         }
-        rtsp_req& Parser(char* Buffbase , int size_t)
+        rtsp_req& Parser(const char* Buffbase , size_t len)
         {//TODO: 将Parser转变成可查询
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        string_view Str_BackGround(Buffbase , len);
+        size_t CRLF_line_beg = Str_BackGround.find("\r\n") ;
             return *this;
         }
+
+
+
+
+
+        
         void setsiz(int siz=1480){MaxSiz=siz;}
         rtsp_req(unique_ptr<string>&& header)
         {
@@ -193,6 +186,5 @@ template<typename T>
         }
     };
 template class rtsp_req<MemaryBlock>;// 初始化 
-
 
 }

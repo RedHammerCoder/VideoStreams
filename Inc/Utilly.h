@@ -4,6 +4,7 @@
 #include <utility>
 #include <memory.h>
 #include <stdlib.h>
+#include "./StrBindtoStru.h"
 using namespace std;
 namespace VideoStreams
 {
@@ -23,12 +24,18 @@ namespace VideoStreams
 namespace BinaryOps {
     using MemAddr = std::pair<char*,size_t>;
     class StrSplit {
+        private:
         // _begin + _maxlength指向分配的内存空间最大值的后一个
         const char* _Begin;
         const size_t _MaxLength;
         char* _CurrPtr;
+
+//------
+
+
+
         public:
-        StrSplit(char* begin , size_t length ):_Begin(begin),_MaxLength(length),_CurrPtr(begin){}
+        StrSplit(const char* begin , size_t length ):_Begin(begin),_MaxLength(length){_CurrPtr=const_cast<char*>(begin); }
         StrSplit()=delete;
         ~StrSplit()=default;
         // splite will return the first char addr  of _split_sym;
@@ -49,7 +56,6 @@ namespace BinaryOps {
                         return MemAddr(nullptr,0);
                     }
                     _CurrPtr++;
-
                 }
                 
 

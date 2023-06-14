@@ -1,5 +1,6 @@
 #ifndef _STR2STRU_
 #define _STR2STRU_
+#pragma once
 #include <string>
 #include <unordered_map>
 using namespace std;
@@ -16,30 +17,33 @@ using namespace std;
 //     virtual KGetID(){}
 //     virtual ~KGetID(){}
 // }
+// unordered_map<string,void*>annoy().find();
 
-#define Register(str)                                 \
-    struct Register_##str##_t                         \
-    {                                                 \
-        static unordered_map<string, void *> KV;      \
-        template <typename T>                         \
-        static void Log2Register(T *str_t)            \
-        {                                             \
-            KV.insert({str_t.ID, (void *)str_t};)     \
-        }                                             \
-        static Register_##str##_t &GetInstance()      \
-        {                                             \
-            static Register_##str##_t ret;            \
-            return ret;                               \
-        }                                             \
-                                                      \
-    private:                                          \
-        Register_##str##_t() {}                       \
-    } register_##str;                                 \
-    struct Base_##str##_t                             \
-    {                                                 \
-        virtual void *GetAddr() { return nullptr; }   \
-        virtual string GetID() { return "BaseType"; } \
-        virtual ~Base_##str##_t() {}                  \
+
+#define Register(str)                                                                    \
+    struct Base_##str##_t                                                                \
+    {                                                                                    \
+        virtual void *GetAddr() { return nullptr; }                                      \
+        virtual string GetID() { return "BaseType"; }                                    \
+        virtual ~Base_##str##_t() {}                                                     \
+    };                                                                                   \
+    struct Register_##str##_t                                                            \
+    {                                                                                    \
+        inline static unordered_map<string, void *> KV;                                  \
+        template <typename T>                                                            \
+        static void Log2Register(T *str_t)                                               \
+        {                                                                                \
+            KV.insert({T::ID, (void *)str_t});                                           \
+        }                                                                                \
+        static Register_##str##_t &GetInstance()                                         \
+        {                                                                                \
+            static Register_##str##_t ret;                                               \
+            return ret;                                                                  \
+        }                                                                                \
+        static auto GetByStr(const char *chrs)->decltype(KV.find("empty")) { return KV.find(chrs); } \
+                                                                                         \
+    private:                                                                             \
+        Register_##str##_t() {}                                                          \
     };
 
 // 在构造函数内部 会自动register到reg中
@@ -48,20 +52,20 @@ using namespace std;
     {                                                    \
         str_##Str##_t()                                  \
         {                                                \
-            (register_##Reg).Log2Register(this);         \
+            Register_##Reg##_t::Log2Register(this);      \
         }                                                \
         static inline const string ID = #Str;            \
         virtual void *GetAddr() { return (void *)this; } \
         virtual string GetID() { return ID; }            \
                                                          \
-    } str_##Str;
+    } struct_##Str;
 
 #define Str2StructWithIllVerb(Tname, Reg, Tvalue)        \
     struct str_##Tname##_t : public Base_##Reg##_t       \
     {                                                    \
         str_##Tname##_t()                                \
         {                                                \
-            (register_##Reg).Log2Register(this);         \
+            Register_##Reg##_t::Log2Register(this);      \
         }                                                \
         virtual void *GetAddr() { return (void *)this; } \
         virtual string GetID() { return ID; }            \
@@ -71,7 +75,7 @@ using namespace std;
 #define ToStrType(str) str_##str##_t
 #define ToStrClass(str) str_##str
 
-Register(Kreg);
-Str2Struct(helloworld, Kreg);
+// Register(Kreg);
+// Str2Struct(helloworld, Kreg);
 
 #endif
