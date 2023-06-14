@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
     memset(BUFFER,0,bufsiz);
     std::cout<<"stage1"<<endl;
     rtsp_req<MemaryBlock> rtspreq;
-    rtspreq.InitHead("%s rtsp://211.94.164.227/3.3gp RTSP/1.0 \r\n",method::struct_OPTIONS.ID.c_str());
+    rtspreq.InitHead("%s rtsp://211.94.164.227/3.3gp RTSP/1.0",method::struct_OPTIONS.ID.c_str());
     std::cout<<"stageX"<<endl;
     rtspreq.HDParser();
     std::cout<<"stageX2"<<endl;
@@ -21,8 +21,10 @@ int main(int argc, char* argv[])
     rtspreq.addReqHeaderFields("User-Agent","WebRTC");
     rtspreq.addReqHeaderFields("Auth","%s  is  %d","helloword",24);
     std::cout<<"stage"<<endl;
-    rtspreq.serialize(BUFFER,bufsiz);
-    printf("%s",BUFFER);
+    int lens= rtspreq.serialize(BUFFER,bufsiz);
+    std::cout<<string(BUFFER,lens)<<endl;
+    rtsp_req<MemaryBlock> temp(BUFFER,lens);
+    
 
 
     

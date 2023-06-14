@@ -1,5 +1,5 @@
 rtspTest : ./rtspTest.cpp
-	g++ -std=c++2a rtspTest.cpp  -o  $@.o
+	g++  -g  -std=c++2a rtspTest.cpp  -o  $@.o
 
 StrSplitTest : StrSplitTest.cpp
 	g++ -std=c++2a $@.cpp  -o  $@.out

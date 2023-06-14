@@ -42,11 +42,6 @@ namespace VideoStreams::rtsp::method
     Str2StructWithIllVerb(Accept_Language,ReqHeadField_Key,Accept-Language)
     Str2StructWithIllVerb(User_Agent,ReqHeadField_Key,User-Agent)
 
-
-
-    
-
-
 }
 
 
