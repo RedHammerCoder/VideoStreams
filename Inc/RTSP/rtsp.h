@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <math.h>
 #include <string_view>
+#include "./Core.h"
 #include "../Utilly.h"
 #include "../StrBindtoStru.h"
 #include "./Method.h"
@@ -27,6 +28,7 @@ namespace VideoStreams::rtsp
     *(BUFF++) = '\n';
 
     const int Buffsize = 256;
+    #if 0
     struct MemaryBlock : public BinaryBlock
     {
         void *begin;
@@ -39,6 +41,8 @@ namespace VideoStreams::rtsp
         }
         ~MemaryBlock() {}
     };
+
+    #endif
     // array<char,2> CRLF{'\r','\n'};
     size_t Port = 554;
     struct RTSP_VERSION
@@ -53,25 +57,28 @@ namespace VideoStreams::rtsp
         virtual bool Check(){};
         virtual ~Checker() {}
     };
-
+#if 0
     struct ReqHeaderFields
     {
         using RequestHeaderFieldsMap = unordered_map<string, string>;
         using RHF_KeyVal = pair<string,string>;
         // int en_serial(RequestHeaderFieldsMap,char* buff ,size_t buf_sz);
     };
+#endif
 
     // template T is used for
     //  template<typename T>
     //  concept DEEPCLONE = requires (T t){t.DeepClone()};
 
-    template <typename T>
-    class rtsp_req : private Checker
+    // template <typename T>
+    class rtsp_req : private Checker ,public BasicMethod<rtsp_req>
     {
+        using CONTAIN = MemaryBlock;
     private:
+
         Base_Method_t *MethodOfRequest;
         int MaxSiz;          // 序列化时最大空间
-        weak_ptr<T> Content; // 需要直接拷贝到目标内存
+        weak_ptr< MemaryBlock> Content; // 需要直接拷贝到目标内存
         ReqHeaderFields::RequestHeaderFieldsMap RHMap;
         unique_ptr<string> ReqHeader;
         // 用于保存head除了方法意外的字符串
@@ -84,15 +91,12 @@ namespace VideoStreams::rtsp
         bool Check() override { return true; }
 
     public:
-        rtsp_req& operator<<(ReqHeaderFields::RHF_KeyVal  Param)
+        rtsp_req& operator<<(ReqHeaderFields::RHF_KeyVal  Param) override
         {
             auto && [key , val]=Param;
-            this->addReqHeaderFields(  std::move(key),std::move( val));
+            this->add_header_pair(  std::move(key),std::move( val));
+            return *this;
         }
-
-
-
-
 
 
         void HDParser(string_view str_v)
@@ -108,12 +112,10 @@ namespace VideoStreams::rtsp
             MethodOfRequest = (method::Base_Method_t *)(*Register_Method_t::GetByStr(Uptr->substr(0, siz).data())).second;
             std::cout << "HDParser  " << MethodOfRequest->GetID() << endl;
         }
-
         ~rtsp_req() {}
-
         // 将所有数据转变成MemBlock
         // 返回值指定写入长度
-        int serialize(char *Buff, int Buffsiz)
+        int imp_Serialize(char *Buff, int Buffsiz)
         {
             if (Check() != true)
                 throw exception();
@@ -144,8 +146,7 @@ namespace VideoStreams::rtsp
                 return (int)(BUFF - Buff);
             }
         }
-
-        void Parser(const char *Buffbase, size_t len)
+        void imp_Parser(const char *Buffbase, size_t len)
         { // TODO: 将Parser转变成string_view
             string_view _BackGround(Buffbase, len);
             vector<string_view> ParamList;
@@ -214,10 +215,10 @@ namespace VideoStreams::rtsp
         rtsp_req(int siz = 0) : MaxSiz(siz){};
         rtsp_req(const char *chr, size_t len)
         {
-            Parser(chr, len);
+            imp_Parser(chr, len);
         }
         template <typename... C>
-        void addReqHeaderFields(string key, C... args)
+        void add_header_pair(string key, C... args)
         {
             char buf[Buffsize];
             memset(buf, 0, Buffsize);
@@ -228,7 +229,7 @@ namespace VideoStreams::rtsp
 #endif
             this->RHMap.insert({key, strl});
         }
-        void addReqHeaderFields(string key, string ss)
+        void add_header_pair(string key, string ss)
         {
             RHMap.insert({key, ss});
         }
@@ -242,14 +243,41 @@ namespace VideoStreams::rtsp
             ReqHeader = make_unique<string>(strl);
         }
         // rtsp_req& operator<<(pair<string,string){
-        //     addReqHeaderFields(std::forword<string>,)
+        //     add_header_pair(std::forword<string>,)
         // }
         // 将负载装入当前东西中
-        void LoadContent(weak_ptr<T> Load)
+        void LoadContent(weak_ptr<rtsp_req::CONTAIN> Load)
         {
             Content = Load; // 多个实体共享文件共享
         }
     };
-    template class rtsp_req<MemaryBlock>; // 初始化
+    // template class rtsp_req<MemaryBlock>; // 初始
+    class rtsp_resp:public BasicMethod<rtsp_resp>{
+        public:
+        // void HDParser()override{}
+        rtsp_resp(char* base_addr , size_t length){}
+        rtsp_resp(rtsp_resp&  _src){}
+        void HDParser(string_view str_v)override {}
+        rtsp_resp& operator<<(ReqHeaderFields::RHF_KeyVal Param)override
+        {
+
+        }
+        void add_header_pair(string key, string val)override
+        {
+
+        }
+        virtual void LoadContent(weak_ptr<MemaryBlock> T)override {}
+
+
+    } ;
+
+
+
+
+
+
+
+
+
 
 }

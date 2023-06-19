@@ -20,6 +20,14 @@ namespace VideoStreams
     
 
 }
+template<bool T>
+struct BASIC_TYPE{
+    static const bool value = T;
+};
+
+using TRUE_T =BASIC_TYPE<true>;
+using FALSE_T = BASIC_TYPE<false>;
+
 
 namespace BinaryOps {
     using MemAddr = std::pair<char*,size_t>;

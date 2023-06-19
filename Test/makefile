@@ -9,6 +9,9 @@ StrStructTest: StrStructTest.cpp
 ParserTest : ParserTest.cpp
 	g++ -g -std=c++2a $@.cpp -o $@.out
 
+rtsp_rw : rtsp_RW.cpp
+	g++ -g -std=c++2a $^ -o $@.out
+
 .PHONY: clean
 
 clean :
